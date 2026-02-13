@@ -7,10 +7,6 @@ import kotlin.random.Random
 class RFCGenerator {
 
 
-
-    // ---------------------------
-    // Normaliza texto (mayúsculas y sin acentos)
-    // ---------------------------
     private fun normalizarTexto(texto: String): String {
         return texto
             .uppercase()
@@ -24,9 +20,7 @@ class RFCGenerator {
             .trim()
     }
 
-    // ---------------------------
-    // Ignora JOSE y MARIA si están al inicio
-    // ---------------------------
+
     private fun obtenerNombreValido(nombres: String): String {
         val lista = nombres.split(" ").filter { it.isNotBlank() }
 
@@ -61,9 +55,6 @@ class RFCGenerator {
         }
     }
 
-    // ---------------------------
-    // Obtiene primera vocal interna del apellido paterno
-    // ---------------------------
     private fun primeraVocalInterna(texto: String): Char {
         val vocales = listOf('A', 'E', 'I', 'O', 'U')
 
@@ -75,9 +66,6 @@ class RFCGenerator {
 
         return 'X'
     }
-
-
-
 
 
     fun generarRFCParcial(
@@ -117,14 +105,11 @@ class RFCGenerator {
         }
 
 
-
-        // 🔥 Validar SOLO si está completa
         val fechaCompleta = anio.length == 4 && mes.length == 2 && dia.length == 2
 
         if (fechaCompleta && !fechaEsValida(anio, mes, dia)) {
             return "Fecha inválida"
         }
-
 
 
         val fechaParcial = construirFechaParcial(anio, mes, dia)
