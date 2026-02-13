@@ -20,7 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.input.key.*
-
 import kotlinx.datetime.LocalDate
 
 @Composable
@@ -66,23 +65,13 @@ fun RFCScreen() {
                 return@derivedStateOf ""
             }
 
-            val fechaParcial = buildString {
-                if (anio.length >= 2) {
-                    append(anio.takeLast(2))
-                }
-                if (mes.isNotBlank()) {
-                    append(mes)
-                }
-                if (dia.isNotBlank()) {
-                    append(dia)
-                }
-            }
-
             generator.generarRFCParcial(
                 nombres = nombres,
                 apellidoPaterno = apellidoPaterno,
                 apellidoMaterno = apellidoMaterno,
-                fechaParcial = fechaParcial
+                anio = anio,
+                mes = mes,
+                dia = dia
             )
 
         }
@@ -104,7 +93,11 @@ fun RFCScreen() {
 
         OutlinedTextField(
             value = nombres,
-            onValueChange = { nombres = it },
+            onValueChange = {
+                if (it.all { char -> char.isLetter() || char.isWhitespace() }) {
+                    nombres = it.uppercase()
+                }
+            },
             label = { Text("Nombre(s)") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -122,7 +115,12 @@ fun RFCScreen() {
 
         OutlinedTextField(
             value = apellidoPaterno,
-            onValueChange = { apellidoPaterno = it },
+            onValueChange = {
+                if (it.all { char -> char.isLetter() || char.isWhitespace() }) {
+                    apellidoPaterno = it.uppercase()
+                }
+            }
+            ,
             label = { Text("Apellido Paterno") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -139,7 +137,12 @@ fun RFCScreen() {
 
         OutlinedTextField(
             value = apellidoMaterno,
-            onValueChange = { apellidoMaterno = it },
+            onValueChange = {
+                if (it.all { char -> char.isLetter() || char.isWhitespace() }) {
+                    apellidoMaterno = it.uppercase()
+                }
+            }
+            ,
             label = { Text("Apellido Materno") },
             modifier = Modifier
                 .fillMaxWidth()

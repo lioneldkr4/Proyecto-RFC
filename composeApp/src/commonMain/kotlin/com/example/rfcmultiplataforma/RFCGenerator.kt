@@ -1,37 +1,12 @@
 package com.example.rfcmultiplataforma
 
 import kotlinx.datetime.LocalDate
+import kotlin.random.Random
+
 
 class RFCGenerator {
 
-    fun generarRFC(
-        nombres: String,
-        apellidoPaterno: String,
-        apellidoMaterno: String,
-        fechaNacimiento: LocalDate?
-    ): String {
 
-        val nombreNormalizado = normalizarTexto(nombres)
-        val paternoNormalizado = normalizarTexto(apellidoPaterno)
-        val maternoNormalizado = normalizarTexto(apellidoMaterno ?: "")
-
-        val nombreValido = obtenerNombreValido(nombreNormalizado)
-
-        val iniciales = construirIniciales(
-            paternoNormalizado,
-            maternoNormalizado,
-            nombreValido
-        )
-
-        val fechaFormateada = fechaNacimiento?.let {
-            formatearFecha(it)
-        } ?: ""
-
-
-        val rfcParcial = iniciales + fechaFormateada
-
-        return filtrarPalabrasInconvenientes(rfcParcial)
-    }
 
     // ---------------------------
     // Normaliza texto (mayúsculas y sin acentos)
@@ -101,21 +76,17 @@ class RFCGenerator {
         return 'X'
     }
 
-    // ---------------------------
-    // Formatea fecha en YYMMDD
-    // ---------------------------
-    private fun formatearFecha(fecha: LocalDate): String {
-        val year = fecha.year.toString().takeLast(2)
-        val month = fecha.monthNumber.toString().padStart(2, '0')
-        val day = fecha.dayOfMonth.toString().padStart(2, '0')
 
-        return "$year$month$day"
-    }
+
+
+
     fun generarRFCParcial(
         nombres: String,
         apellidoPaterno: String,
         apellidoMaterno: String,
-        fechaParcial: String
+        anio: String,
+        mes: String,
+        dia: String
     ): String {
 
         val nombreNormalizado = normalizarTexto(nombres)
@@ -130,15 +101,91 @@ class RFCGenerator {
             nombreValido
         )
 
+        // Construcción progresiva de fecha
+        var fechaConstruida = ""
+
+        if (anio.length == 4) {
+            fechaConstruida += anio.takeLast(2)
+        }
+
+        if (mes.length == 2) {
+            fechaConstruida += mes
+        }
+
+        if (dia.length == 2) {
+            fechaConstruida += dia
+        }
+
+
+
+        // 🔥 Validar SOLO si está completa
+        val fechaCompleta = anio.length == 4 && mes.length == 2 && dia.length == 2
+
+        if (fechaCompleta && !fechaEsValida(anio, mes, dia)) {
+            return "Fecha inválida"
+        }
+
+
+
+        val fechaParcial = construirFechaParcial(anio, mes, dia)
+
         val rfcParcial = iniciales + fechaParcial
+
+        if (fechaCompleta) {
+            return filtrarPalabrasInconvenientes(rfcParcial) + generarHomoclave()
+        }
 
         return filtrarPalabrasInconvenientes(rfcParcial)
     }
 
-    // ---------------------------
-    // Filtro básico de palabras inconvenientes
-    // (lista reducida de ejemplo)
-    // ---------------------------
+    private fun construirFechaParcial(
+        anio: String,
+        mes: String,
+        dia: String
+    ): String {
+
+        return buildString {
+            if (anio.length >= 2) {
+                append(anio.takeLast(2))
+            }
+            if (mes.isNotBlank()) {
+                append(mes)
+            }
+            if (dia.isNotBlank()) {
+                append(dia)
+            }
+        }
+    }
+
+    private fun fechaEsValida(
+        anio: String,
+        mes: String,
+        dia: String
+    ): Boolean {
+
+        if (anio.length != 4 || mes.length != 2 || dia.length != 2) {
+            return false
+        }
+
+        return try {
+            LocalDate(
+                year = anio.toInt(),
+                monthNumber = mes.toInt(),
+                dayOfMonth = dia.toInt()
+            )
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun generarHomoclave(): String {
+        val caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return (1..3)
+            .map { caracteres.random() }
+            .joinToString("")
+    }
+
     private fun filtrarPalabrasInconvenientes(rfc: String): String {
 
         val palabrasInconvenientes = setOf(
