@@ -7,8 +7,8 @@ class RFCGenerator {
     fun generarRFC(
         nombres: String,
         apellidoPaterno: String,
-        apellidoMaterno: String?,
-        fechaNacimiento: LocalDate
+        apellidoMaterno: String,
+        fechaNacimiento: LocalDate?
     ): String {
 
         val nombreNormalizado = normalizarTexto(nombres)
@@ -23,7 +23,10 @@ class RFCGenerator {
             nombreValido
         )
 
-        val fechaFormateada = formatearFecha(fechaNacimiento)
+        val fechaFormateada = fechaNacimiento?.let {
+            formatearFecha(it)
+        } ?: ""
+
 
         val rfcParcial = iniciales + fechaFormateada
 
@@ -108,6 +111,29 @@ class RFCGenerator {
 
         return "$year$month$day"
     }
+    fun generarRFCParcial(
+        nombres: String,
+        apellidoPaterno: String,
+        apellidoMaterno: String,
+        fechaParcial: String
+    ): String {
+
+        val nombreNormalizado = normalizarTexto(nombres)
+        val paternoNormalizado = normalizarTexto(apellidoPaterno)
+        val maternoNormalizado = normalizarTexto(apellidoMaterno)
+
+        val nombreValido = obtenerNombreValido(nombreNormalizado)
+
+        val iniciales = construirIniciales(
+            paternoNormalizado,
+            maternoNormalizado,
+            nombreValido
+        )
+
+        val rfcParcial = iniciales + fechaParcial
+
+        return filtrarPalabrasInconvenientes(rfcParcial)
+    }
 
     // ---------------------------
     // Filtro básico de palabras inconvenientes
@@ -128,7 +154,7 @@ class RFCGenerator {
 
         if (primerasCuatro in palabrasInconvenientes) {
             return primerasCuatro
-                .replaceRange(1, 2, "X") + rfc.drop(4)
+                .replaceRange(3, 4, "X") + rfc.drop(4)
         }
 
         return rfc
